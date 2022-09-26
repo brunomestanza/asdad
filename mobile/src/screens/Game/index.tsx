@@ -9,6 +9,7 @@ import { THEME } from '../../theme';
 import logoImg from '../../assets/logo-nlw-esports.png';
 import { Heading } from '../../components/Heading';
 import { DuoCard, DuoCardProps } from '../../components/DuoCard';
+import { DuoMatch } from '../../components/DuoMatch';
 
 interface RouteParams {
   id: string;
@@ -18,18 +19,25 @@ interface RouteParams {
 
 export function Game() {
   const [duos, setDuos] = useState<DuoCardProps[]>([]);
+  const [discordDuoSelected, setDiscordDuoSelected] = useState('');
   const navigate = useNavigation();
   const route = useRoute();
   const game = route.params as RouteParams;
 
   useEffect(() => {
-    fetch(`http://192.168.1.102:3333/games/${game.id}/ads`)
+    fetch(`http://192.168.0.196:3333/games/${game.id}/ads`)
     .then(response => response.json())
     .then(data => setDuos(data));
   }, []);
 
   function handleGoBack() {
     navigate.goBack();
+  }
+
+  async function getDiscordUser(adId: string) {
+    fetch(`http://192.168.0.196:3333/ads/${adId}/discord`)
+    .then(response => response.json())
+    .then(data => setDiscordDuoSelected(data.discord));
   }
 
   return (
@@ -46,17 +54,22 @@ export function Game() {
         <Heading title={game.title} subtitle='Conecte-se e comece a jogar!' />
         <FlatList
           ListEmptyComponent={() => (
-            <Text style={styles.emptyListText}>Não há anúncios disponíveis</Text>
+            <Text style={styles.emptyListText}>Não há anúncios publicados ainda.</Text>
           )}
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.containerList}
-          contentContainerStyle={duos.length === 0 ? styles.emptyListContent : styles.contentList}
+          contentContainerStyle= {duos.length === 0 ? styles.emptyListContent : styles.contentList}
           data={duos}
           keyExtractor={item => item.id}
           renderItem={({ item }) => (
-            <DuoCard onConnect={() => {}} data={item} />
+            <DuoCard onConnect={() => getDiscordUser(item.id)} data={item} />
           )}
+        />
+        <DuoMatch
+          onClose={() => setDiscordDuoSelected('')}
+          visible={discordDuoSelected.length > 0}
+          discord={discordDuoSelected}
         />
       </SafeAreaView>
     </Background>

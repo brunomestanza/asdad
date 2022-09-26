@@ -1,11 +1,14 @@
 import { HTMLAttributes } from "react";
+import * as ToggleGroup from '@radix-ui/react-toggle-group';
 
 interface DateButtonProps extends HTMLAttributes<HTMLButtonElement>{
   day: string;
+  indexValue: string;
+  weekDays: string[];
 };
 
-export function DateButton({ day, ...rest }: DateButtonProps) {
+export function DateButton({ day, indexValue, weekDays, ...rest }: DateButtonProps) {
   return (
-    <button className="w-8 h-8 rounded bg-zinc-9000" {...rest}>{day}</button>
+    <ToggleGroup.Item value={indexValue} className={`w-8 h-8 rounded ${weekDays.includes(indexValue) ? 'bg-violet-500' : 'bg-zinc-900'}`} {...rest}>{day}</ToggleGroup.Item>
   );
 };
